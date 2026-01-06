@@ -8,9 +8,11 @@
     <artifactId>duration-parser</artifactId>
     <version>1.0.0</version>
     <packaging>jar</packaging>
+
     <name>duration-parser</name>
     <description>A lightweight, zero-dependency Java library for parsing and formatting human-readable durations (e.g., "2h 30m") to/from java.time.Duration.</description>
-    <url>http://github.com/PetarMc1/duration-parser</url>
+    <url>https://github.com/PetarMc1/duration-parser</url>
+
     <licenses>
         <license>
             <name>The Apache Software License, Version 2.0</name>
@@ -18,19 +20,22 @@
             <distribution>repo</distribution>
         </license>
     </licenses>
+
     <developers>
         <developer>
             <name>Petar_mc</name>
             <email>contact@petarmc.com</email>
             <organization>Petar_mc</organization>
-            <organizationUrl>http://petarmc.com</organizationUrl>
+            <organizationUrl>https://petarmc.com</organizationUrl>
         </developer>
     </developers>
+
     <scm>
-        <connection>scm:git:git://github.com:PetarMc1/duration-parser.git.git</connection>
-        <developerConnection>scm:git:ssh://github.com:PetarMc1/duration-parser.git</developerConnection>
-        <url>http://github.com/PetarMc1/duration-parser</url>
+        <connection>scm:git:git://github.com/PetarMc1/duration-parser.git</connection>
+        <developerConnection>scm:git:ssh://github.com/PetarMc1/duration-parser.git</developerConnection>
+        <url>https://github.com/PetarMc1/duration-parser</url>
     </scm>
+
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
@@ -41,21 +46,15 @@
 
     <distributionManagement>
         <repository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-        </repository>
-        <snapshotRepository>
-                <id>petarmc-snapshots</id>
-                <url>https://maven.petarmc.com/snapshots</url>
-        </snapshotRepository>
-    </distributionManagement>
-
-    <repositories>
-        <repository>
             <id>petarmc-releases</id>
+            <name>Maven Repository</name>
             <url>https://maven.petarmc.com/releases</url>
         </repository>
-    </repositories>
+        <snapshotRepository>
+            <id>petarmc-snapshots</id>
+            <url>https://maven.petarmc.com/snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
 
     <dependencies>
         <dependency>
@@ -70,31 +69,27 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <version>3.3.1</version>
-                <executions>
-                    <execution>
-                        <id>attach-sources</id>
-                        <goals><goal>jar-no-fork</goal></goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.13.0</version>
                 <configuration>
                     <release>${maven.compiler.release}</release>
                 </configuration>
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.4.0</version>
-                <configuration>
-                    <useModulePath>false</useModulePath>
-                </configuration>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.3.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
@@ -108,6 +103,7 @@
                     </execution>
                 </executions>
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-gpg-plugin</artifactId>
@@ -122,18 +118,34 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.4.0</version>
+                <configuration>
+                    <useModulePath>false</useModulePath>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+                <version>0.9.0</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <publishingServerId>ossrh</publishingServerId>
+                    <autoPublish>true</autoPublish>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>3.1.2</version>
+                <configuration><skip>false</skip></configuration>
+            </plugin>
         </plugins>
     </build>
 
-    <profiles>
-        <profile>
-            <id>petarmc</id>
-            <distributionManagement>
-                <repository>
-                    <id>petarmc-releases</id>
-                    <url>https://maven.petarmc.com/releases</url>
-                </repository>
-            </distributionManagement>
-        </profile>
-    </profiles>
 </project>
