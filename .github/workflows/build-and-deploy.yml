@@ -1,0 +1,69 @@
+name: Build and deploy Javadocs
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+
+    env:
+      JD_REPO: PetarMc1/javadocs
+      JD_USERNAME: PetarMc1
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Build, run tests and generate Javadoc JAR
+        run: mvn -B clean package javadoc:javadoc
+
+      - name: Deploy Javadocs to javadocs repo
+        if: ${{ secrets.JD_DEPLOY_TOKEN }}
+        env:
+          JD_DEPLOY_TOKEN: ${{ secrets.JD_DEPLOY_TOKEN }}
+          JD_REPO: ${{ env.JD_REPO }}
+          JD_USERNAME: ${{ env.JD_USERNAME }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          echo "Deploying Javadocs to ${JD_REPO} under duration-parser/${REF_NAME}"
+
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+
+          # Clone the target javadocs repo using username and token
+          git clone https://${JD_USERNAME}:${JD_DEPLOY_TOKEN}@github.com/${JD_REPO}.git deploy-repo
+          cd deploy-repo
+
+          # Prepare destination folder and copy generated apidocs
+          mkdir -p duration-parser/${REF_NAME}
+          rm -rf duration-parser/${REF_NAME}/*
+
+          if [ -d "../target/site/apidocs" ]; then
+            cp -a ../target/site/apidocs/. duration-parser/${REF_NAME}/
+          elif [ -f "../target/*-javadoc.jar" ]; then
+            echo "Javadoc JAR exists but apidocs directory not found. Extracting JAR contents..."
+            tmpdir=$(mktemp -d)
+            jar xf ../target/*-javadoc.jar -C ${tmpdir} || true
+            cp -a ${tmpdir}/. duration-parser/${REF_NAME}/
+            rm -rf ${tmpdir}
+          else
+            echo "No javadocs found in target. Nothing to deploy."
+            exit 1
+          fi
+
+          git add duration-parser/${REF_NAME}
+          git commit -m "Update duration-parser Javadocs (release ${REF_NAME})" || echo "No changes to commit"
+          git push
+
+

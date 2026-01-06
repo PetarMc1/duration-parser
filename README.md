@@ -2,8 +2,6 @@
 
 A lightweight, zero-dependency Java 17+ library for parsing and formatting human-readable durations (e.g., `"2h 30m"`, `"1d5h15m"`, `"45min"`) to and from `java.time.Duration`.
 
-![Build Status](https://img.shields.io/badge/build-passing-lightgrey)
-![Maven Central](https://img.shields.io/badge/maven--central-pending-lightgrey)
 
 ## Maven
 ```xml
@@ -36,4 +34,4 @@ System.out.println(d.toLongString());    // 1 day, 2 hours and 30 minutes
 - Compact: `2h 30m`
 
 ## License
-Apache License 2.0. See `LICENSE` and `NOTICE`.
+Apache License 2.0. See `LICENSE` file for details.
