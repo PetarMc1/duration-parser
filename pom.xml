@@ -6,7 +6,7 @@
 
     <groupId>com.petarmc</groupId>
     <artifactId>duration-parser</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <packaging>jar</packaging>
     <name>duration-parser</name>
     <description>A lightweight, zero-dependency Java library for parsing and formatting human-readable durations (e.g., "2h 30m") to/from java.time.Duration.</description>
