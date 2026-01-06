@@ -40,7 +40,7 @@ public record DurationParser(Duration duration) {
     /**
      * Parse a human-friendly duration string into a {@link DurationParser}.
      *
-     * <p>The input may contain multiple token pairs of "<number><unit>" where
+     * The input may contain multiple token pairs of {@code <number><unit>} where
      * unit can be one of: d, day, days, h, hr, hrs, hour, hours, m, min, mins,
      * minute, minutes, s, sec, secs, second, seconds. Tokens may be separated
      * by whitespace. Examples: "1d 2h", "90 minutes", "45s".
