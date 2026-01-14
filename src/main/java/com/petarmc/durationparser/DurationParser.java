@@ -12,6 +12,12 @@ import java.util.regex.Pattern;
  * Example supported inputs: "1d 2h 3m 4s", "2 hours 30 minutes", "45s".
  * Supported units: days (d), hours (h, hr, hrs), minutes (m, min, mins),
  * seconds (s, sec, secs). Parsing is case-insensitive.
+ *
+ * The parser also understands several natural language extras:
+ * - separators beyond spaces such as commas, semicolons, plus signs, ampersands and the word "and" (e.g. "1h, 30m" or "1h and 30m").
+ * - the phrase "half an hour" (and similar variants) which maps to 30 minutes.
+ * - the indefinite articles "a"/"an" (e.g. "an hour" -> "1 hour").
+ * - relative prefixes like "in 2 hours" and suffixes like "from now" or "ago" (the duration returned is the absolute interval, not a timestamp).
  */
 public record DurationParser(Duration duration) {
     /**
@@ -43,7 +49,7 @@ public record DurationParser(Duration duration) {
      * The input may contain multiple token pairs of {@code <number><unit>} where
      * unit can be one of: d, day, days, h, hr, hrs, hour, hours, m, min, mins,
      * minute, minutes, s, sec, secs, second, seconds. Tokens may be separated
-     * by whitespace. Examples: "1d 2h", "90 minutes", "45s".
+     * by whitespace or common punctuation/words (commas, semicolons, plus signs, "and"). Examples: "1d 2h", "90 minutes", "45s".
      *
      * @param input the string to parse; must not be null or blank
      * @return a new {@link DurationParser} representing the parsed duration
@@ -60,13 +66,24 @@ public record DurationParser(Duration duration) {
             throw new IllegalArgumentException("input must not be null or blank");
         }
 
-        Matcher matcher = TOKEN.matcher(normalized);
+        String working = normalized.toLowerCase(Locale.ROOT);
+
+        working = working.replaceAll("\\bhalf(?: an| a)? hour(?:s)?\\b", "30 minutes");
+
+        working = working.replaceAll("\\b(?:a|an)\\s+(day|hour|minute|second)s?\\b", "1 $1");
+
+        working = working.replaceAll("^in\\s+", "").trim();
+        working = working.replaceAll("\\s+from\\s+now$", "").trim();
+        working = working.replaceAll("\\s+ago$", "").trim();
+
+        Matcher matcher = TOKEN.matcher(working);
         long days = 0, hours = 0, minutes = 0, seconds = 0;
         int matches = 0;
         int position = 0;
 
         while (matcher.find()) {
-            if (containsNonWhitespace(normalized, position, matcher.start())) {
+
+            if (!isSeparatorOnly(working, position, matcher.start())) {
                 throw new IllegalArgumentException("Invalid duration format near position " + position + ": " + input);
             }
             matches++;
@@ -84,8 +101,8 @@ public record DurationParser(Duration duration) {
             }
             position = matcher.end();
         }
-        
-        if (matches == 0 || containsNonWhitespace(normalized, position, normalized.length())) {
+
+        if (matches == 0 || !isSeparatorOnly(working, position, working.length())) {
             throw new IllegalArgumentException("Invalid duration format: " + input);
         }
 
@@ -99,6 +116,21 @@ public record DurationParser(Duration duration) {
         } catch (ArithmeticException ex) {
             throw new IllegalArgumentException("Duration is too large", ex);
         }
+    }
+
+    /**
+     * Return true when the substring working[start:end] contains only allowed
+     * separators (whitespace, punctuation like , ; + - * / &, or the word "and").
+     */
+    private static boolean isSeparatorOnly(String working, int start, int end) {
+        if (start >= end) {
+            return true;
+        }
+        String between = working.substring(start, end);
+        // remove common separators and whitespace
+        String stripped = between.replaceAll("[\\s,;:+\\-*/&]+", "");
+        // after stripping punctuation & whitespace, string must be empty or equal to 'and'
+        return stripped.isEmpty() || stripped.equalsIgnoreCase("and");
     }
 
     /**
